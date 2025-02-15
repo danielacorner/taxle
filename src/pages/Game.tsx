@@ -10,7 +10,7 @@ const Index = () => {
   const {
     gameState,
     letterStates,
-    handleGuess,
+    submitGuess,
     handleKeyPress,
     handleDelete,
     handleGiveUp,
@@ -30,13 +30,13 @@ const Index = () => {
       }
       // Handle enter
       else if (e.key === 'Enter') {
-        handleGuess();
+        submitGuess();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState.gameStatus, handleKeyPress, handleDelete, handleGuess]);
+  }, [gameState.gameStatus, handleKeyPress, handleDelete, submitGuess]);
 
   if (!gameState.targetSpecies) return null;
 
@@ -60,7 +60,7 @@ const Index = () => {
           <Keyboard
             onKeyPress={handleKeyPress}
             onDelete={handleDelete}
-            onEnter={handleGuess}
+            onEnter={submitGuess}
             letterStates={letterStates}
           />
         </div>
