@@ -3,6 +3,7 @@ import { Species, GuessResult, GameState } from "@/types/game";
 import { speciesDatabase } from "@/data/species";
 import { useToast } from "@/hooks/use-toast";
 import { getDailySeed, getSeededRandom } from "@/utils/daily-seed";
+import { gameEvents } from "@/utils/analytics";
 
 export const useGame = () => {
   const { toast } = useToast();
@@ -22,6 +23,9 @@ export const useGame = () => {
     const speciesIndex = getSeededRandom(seed, speciesDatabase.length);
     const todaysSpecies = speciesDatabase[speciesIndex];
     setGameState(prev => ({ ...prev, targetSpecies: todaysSpecies }));
+    
+    // Track game start
+    gameEvents.startGame();
   }, []);
 
   const checkGuess = (guess: string): GuessResult => {
@@ -75,50 +79,43 @@ export const useGame = () => {
     setLetterStates(newStates);
   };
 
-  const handleGuess = () => {
+  const submitGuess = () => {
     if (!gameState.targetSpecies) return;
-    
-    const targetWord = gameState.targetSpecies.scientificName;
-    const guess = gameState.currentGuess;
-    
-    // Compare lengths ignoring spaces
-    const nonSpaceTarget = targetWord.replace(/\s/g, '');
-    const nonSpaceGuess = guess.replace(/\s/g, '');
-    
-    if (nonSpaceGuess.length !== nonSpaceTarget.length) {
+
+    const guess = gameState.currentGuess.trim();
+    if (guess.length === 0) {
       toast({
-        title: "Invalid guess",
-        description: "Your guess must contain the same number of letters as the target species name",
-        variant: "destructive",
+        description: "Please enter a guess",
       });
       return;
     }
 
     const result = checkGuess(guess);
+    const newGuesses = [...gameState.guesses, guess];
+    const newResults = [...gameState.results, result];
+
+    // Track the guess attempt
+    gameEvents.makeGuess(newGuesses.length);
+
+    let newGameStatus = gameState.gameStatus;
+    if (guess === gameState.targetSpecies.scientificName) {
+      newGameStatus = "won";
+      // Track game won
+      gameEvents.gameWon(newGuesses.length);
+    } else if (newGuesses.length >= 6) {
+      newGameStatus = "lost";
+      // Track game lost
+      gameEvents.gameLost(gameState.targetSpecies.scientificName);
+    }
+
     updateLetterStates(guess, result);
 
-    setGameState(prev => {
-      const newState = {
-        ...prev,
-        guesses: [...prev.guesses, guess],
-        results: [...prev.results, result],
-        currentGuess: "",
-      };
-
-      // Check if won - needs exact match including case and spaces
-      if (guess === targetWord) {
-        return {
-          ...newState,
-          gameStatus: 'won',
-        };
-      } else if (newState.guesses.length >= 6) {
-        return {
-          ...newState,
-          gameStatus: 'lost',
-        };
-      }
-
-      return newState;
+    setGameState({
+      ...gameState,
+      currentGuess: "",
+      guesses: newGuesses,
+      results: newResults,
+      gameStatus: newGameStatus,
     });
   };
 
@@ -173,7 +170,7 @@ export const useGame = () => {
   return {
     gameState,
     letterStates,
-    handleGuess,
+    submitGuess,
     handleKeyPress,
     handleDelete,
   };
