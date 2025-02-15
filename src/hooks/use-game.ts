@@ -28,25 +28,25 @@ export const useGame = () => {
     guess = guess.toLowerCase();
     
     const result: GuessResult = Array(guess.length).fill('absent');
-    const targetChars = target.split('');
-    const guessChars = guess.split('');
+    const targetChars = [...target];  // Create a copy to avoid modifying original
+    const remainingTargetChars = [...target];  // Second copy for second pass
+    const guessChars = [...guess];
     
     // First pass: mark correct letters
     guessChars.forEach((char, i) => {
       if (char === targetChars[i]) {
         result[i] = 'correct';
-        targetChars[i] = '#';
-        guessChars[i] = '#';
+        remainingTargetChars[i] = '#';  // Mark as used for second pass
       }
     });
     
     // Second pass: mark present letters
     guessChars.forEach((char, i) => {
-      if (char !== '#' && char !== ' ') {
-        const targetIndex = targetChars.findIndex(c => c === char);
+      if (result[i] !== 'correct' && char !== ' ') {  // Only check if not already marked correct
+        const targetIndex = remainingTargetChars.findIndex(c => c === char);
         if (targetIndex !== -1) {
           result[i] = 'present';
-          targetChars[targetIndex] = '#';
+          remainingTargetChars[targetIndex] = '#';  // Mark as used
         }
       }
     });
@@ -171,11 +171,28 @@ export const useGame = () => {
     }));
   };
 
+  const handleGiveUp = () => {
+    if (gameState.guesses.length < 6) {
+      toast({
+        title: "Keep trying!",
+        description: "You need to make at least 6 guesses before giving up",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setGameState(prev => ({
+      ...prev,
+      gameStatus: 'gave_up'
+    }));
+  };
+
   return {
     gameState,
     letterStates,
     handleGuess,
     handleKeyPress,
     handleDelete,
+    handleGiveUp,
   };
 };

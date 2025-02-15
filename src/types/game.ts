@@ -1,4 +1,3 @@
-
 export interface Species {
   scientificName: string;
   wikipediaUrl: string;
@@ -12,6 +11,6 @@ export interface GameState {
   currentGuess: string;
   guesses: string[];
   results: GuessResult[];
-  gameStatus: 'playing' | 'won' | 'lost';
+  gameStatus: 'playing' | 'won' | 'lost' | 'gave_up';
   targetSpecies: Species | null;
 }
