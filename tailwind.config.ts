@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -13,12 +12,30 @@ export default {
     },
     extend: {
       colors: {
-        primary: "#1B4332",
-        secondary: "#F4F1DE",
-        accent: "#E9C46A",
-        correct: "#2D6A4F",
-        present: "#CA8A04",
-        absent: "#6B7280",
+        primary: {
+          DEFAULT: "#1B4332",
+          dark: "#081C15"
+        },
+        secondary: {
+          DEFAULT: "#F4F1DE",
+          dark: "#2D3748"
+        },
+        accent: {
+          DEFAULT: "#E9C46A",
+          dark: "#D97706"
+        },
+        correct: {
+          DEFAULT: "#2D6A4F",
+          dark: "#059669"
+        },
+        present: {
+          DEFAULT: "#CA8A04",
+          dark: "#D97706"
+        },
+        absent: {
+          DEFAULT: "#6B7280",
+          dark: "#4B5563"
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

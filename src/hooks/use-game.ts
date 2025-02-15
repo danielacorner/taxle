@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Species, GuessResult, GameState } from "@/types/game";
 import { speciesDatabase } from "@/data/species";
@@ -155,9 +154,20 @@ export const useGame = () => {
   };
 
   const handleDelete = () => {
+    if (!gameState.currentGuess.length) return;
+    
+    let newGuess = gameState.currentGuess;
+    // Remove trailing spaces and last character
+    while (newGuess.length > 0 && newGuess[newGuess.length - 1] === ' ') {
+      newGuess = newGuess.slice(0, -1);
+    }
+    if (newGuess.length > 0) {
+      newGuess = newGuess.slice(0, -1);
+    }
+    
     setGameState(prev => ({
       ...prev,
-      currentGuess: prev.currentGuess.slice(0, -1),
+      currentGuess: newGuess,
     }));
   };
 

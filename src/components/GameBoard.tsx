@@ -14,25 +14,24 @@ export const GameBoard = ({ guesses, results, currentGuess, targetLength, target
   
   const getBackgroundColor = (result: 'correct' | 'present' | 'absent') => {
     switch (result) {
-      case 'correct': return 'bg-correct text-white';
-      case 'present': return 'bg-present text-white';
-      case 'absent': return 'bg-absent text-white';
-      default: return 'bg-secondary/10';
+      case 'correct': return 'bg-correct text-white dark:bg-correct-dark';
+      case 'present': return 'bg-present text-white dark:bg-present-dark';
+      case 'absent': return 'bg-absent text-white dark:bg-absent-dark';
+      default: return 'bg-secondary/10 dark:bg-secondary-dark/10';
     }
   };
 
   const renderCell = (letter: string, result?: 'correct' | 'present' | 'absent') => {
     if (letter === ' ') {
       return (
-        <div className="h-14 flex items-center justify-center text-xl font-bold border-2 border-primary/5 rounded bg-secondary/5">
-          {/* <span className="w-4 h-1 bg-primary/20 rounded" /> */}
+        <div className="h-14 flex items-center justify-center text-xl font-bold border-2 border-primary/5 dark:border-primary-dark/5 rounded bg-secondary/5 dark:bg-secondary-dark/5">
         </div>
       );
     }
 
     return (
-      <div className={`h-14 flex items-center justify-center text-xl font-bold border-2 rounded ${
-        result ? getBackgroundColor(result) : 'border-primary/30'
+      <div className={`h-14 flex items-center justify-center text-xl font-bold border-2 rounded text-primary dark:text-white ${
+        result ? getBackgroundColor(result) : 'border-primary/30 dark:border-white/35 bg-secondary/5 dark:bg-secondary-light/5'
       }`}>
         {letter.toUpperCase()}
       </div>
@@ -96,7 +95,7 @@ export const GameBoard = ({ guesses, results, currentGuess, targetLength, target
       )}
       
       {Array(emptyRows).fill(null).map((_, i) => (
-        <div key={`empty-row-${i}`} className="grid grid-cols-[repeat(auto-fit,minmax(2rem,1fr))] gap-1">
+        <div key={`empty-row-${i}`} className="dark:text-white grid grid-cols-[repeat(auto-fit,minmax(2rem,1fr))] gap-1">
           {targetWord.split('').map((targetLetter, j) => (
             <div key={`empty-${i}-${j}`}>
               {renderCell(targetLetter === ' ' ? ' ' : '')}

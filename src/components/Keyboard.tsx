@@ -1,4 +1,3 @@
-
 import { GuessResult } from "@/types/game";
 
 interface KeyboardProps {
@@ -18,10 +17,10 @@ export const Keyboard = ({ onKeyPress, onDelete, onEnter, letterStates }: Keyboa
   const getKeyBackground = (key: string) => {
     const state = letterStates[key];
     switch (state) {
-      case 'correct': return 'bg-correct text-white hover:bg-correct/90';
-      case 'present': return 'bg-present text-white hover:bg-present/90';
-      case 'absent': return 'bg-absent text-white hover:bg-absent/90';
-      default: return 'bg-secondary/10 hover:bg-secondary/20';
+      case 'correct': return 'bg-correct dark:bg-correct-dark text-white hover:bg-correct/90 dark:hover:bg-correct-dark/90';
+      case 'present': return 'bg-present dark:bg-present-dark text-white hover:bg-present/90 dark:hover:bg-present-dark/90';
+      case 'absent': return 'bg-absent dark:bg-absent-dark text-white hover:bg-absent/90 dark:hover:bg-absent-dark/90';
+      default: return 'bg-secondary/10 dark:bg-secondary-dark/10 hover:bg-secondary/20 dark:hover:bg-secondary-dark/20';
     }
   };
 

@@ -15,9 +15,9 @@ const ExampleGuess = ({ name, statuses }: { name: string; statuses: Array<'corre
             {part.split('').map((letter, index) => {
               const status = statuses[index];
               const bgColor = {
-                correct: 'bg-green-500',
-                present: 'bg-yellow-500',
-                absent: 'bg-gray-500'
+                correct: 'bg-correct-dark dark:bg-correct-dark',
+                present: 'bg-present-dark dark:bg-present-dark',
+                absent: 'bg-absent-dark dark:bg-absent-dark'
               }[status];
 
               return (
@@ -43,9 +43,9 @@ export const HowToPlayDialog = () => {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold mb-4">How To Play</DialogTitle>
+          <DialogTitle className="text-2xl font-bold mb-4 text-primary dark:text-white/90">How To Play</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="space-y-4 text-primary/90 dark:text-white/90">
           <p>Guess the scientific name in 6 tries.</p>
           
           <div className="space-y-4">
