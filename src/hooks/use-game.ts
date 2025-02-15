@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Species, GuessResult, GameState } from "@/types/game";
 import { speciesDatabase } from "@/data/species";
 import { useToast } from "@/hooks/use-toast";
+import { getDailySeed, getSeededRandom } from "@/utils/daily-seed";
 
 export const useGame = () => {
   const { toast } = useToast();
@@ -16,9 +17,11 @@ export const useGame = () => {
   const [letterStates, setLetterStates] = useState<Record<string, 'correct' | 'present' | 'absent'>>({});
 
   useEffect(() => {
-    // For MVP, just select a random species
-    const randomSpecies = speciesDatabase[Math.floor(Math.random() * speciesDatabase.length)];
-    setGameState(prev => ({ ...prev, targetSpecies: randomSpecies }));
+    // Get today's seed and use it to select today's species
+    const seed = getDailySeed();
+    const speciesIndex = getSeededRandom(seed, speciesDatabase.length);
+    const todaysSpecies = speciesDatabase[speciesIndex];
+    setGameState(prev => ({ ...prev, targetSpecies: todaysSpecies }));
   }, []);
 
   const checkGuess = (guess: string): GuessResult => {
