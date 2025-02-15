@@ -259,4 +259,4 @@ import { vertebrateSpecies } from "./vertebrate-species-mini";
 // ];
 
 // Combine original species with vertebrate species
-export const speciesDatabase: Species[] = vertebrateSpecies
+export const speciesDatabase: Species[] = vertebrateSpecies.filter((species) => species.scientificName.length <= 16)
