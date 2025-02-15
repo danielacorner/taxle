@@ -24,29 +24,28 @@ export const useGame = () => {
   const checkGuess = (guess: string): GuessResult => {
     if (!gameState.targetSpecies) return [];
     
-    const target = gameState.targetSpecies.scientificName.toLowerCase();
-    guess = guess.toLowerCase();
-    
-    const result: GuessResult = Array(guess.length).fill('absent');
-    const targetChars = [...target];  // Create a copy to avoid modifying original
-    const remainingTargetChars = [...target];  // Second copy for second pass
+    const target = gameState.targetSpecies.scientificName;
+    const result: GuessResult = Array(target.length).fill('absent');
+    const targetChars = [...target];
     const guessChars = [...guess];
     
-    // First pass: mark correct letters
+    // First pass: mark correct letters (exact case match)
     guessChars.forEach((char, i) => {
       if (char === targetChars[i]) {
         result[i] = 'correct';
-        remainingTargetChars[i] = '#';  // Mark as used for second pass
+        targetChars[i] = '#';  // Mark as used
       }
     });
     
-    // Second pass: mark present letters
+    // Second pass: mark present letters (case-insensitive)
     guessChars.forEach((char, i) => {
-      if (result[i] !== 'correct' && char !== ' ') {  // Only check if not already marked correct
-        const targetIndex = remainingTargetChars.findIndex(c => c === char);
+      if (result[i] !== 'correct' && char !== ' ') {
+        const targetIndex = targetChars.findIndex(c => 
+          c !== '#' && c.toLowerCase() === char.toLowerCase()
+        );
         if (targetIndex !== -1) {
           result[i] = 'present';
-          remainingTargetChars[targetIndex] = '#';  // Mark as used
+          targetChars[targetIndex] = '#';  // Mark as used
         }
       }
     });
@@ -77,15 +76,9 @@ export const useGame = () => {
     if (!gameState.targetSpecies) return;
     
     const targetWord = gameState.targetSpecies.scientificName;
-    let guess = gameState.currentGuess;
+    const guess = gameState.currentGuess;
     
-    // Add spaces to match target word
-    targetWord.split('').forEach((char, i) => {
-      if (char === ' ') {
-        guess = guess.slice(0, i) + ' ' + guess.slice(i);
-      }
-    });
-    
+    // Compare lengths ignoring spaces
     const nonSpaceTarget = targetWord.replace(/\s/g, '');
     const nonSpaceGuess = guess.replace(/\s/g, '');
     
@@ -109,7 +102,8 @@ export const useGame = () => {
         currentGuess: "",
       };
 
-      if (result.every(r => r === 'correct')) {
+      // Check if won - needs exact match including case and spaces
+      if (guess === targetWord) {
         return {
           ...newState,
           gameStatus: 'won',
@@ -134,17 +128,19 @@ export const useGame = () => {
     // Find the next non-space position in the target word
     let nextPos = newGuess.length;
     while (nextPos < targetWord.length && targetWord[nextPos] === ' ') {
+      newGuess += ' ';  // Add spaces directly
       nextPos++;
     }
     
     // If we haven't reached the end and the next position is valid
     if (nextPos < targetWord.length) {
-      // Add any spaces before the new letter
-      while (newGuess.length < nextPos) {
-        newGuess += ' ';
+      // Add the new letter, preserving case based on target word
+      const targetChar = targetWord[nextPos];
+      if (targetChar.toLowerCase() === key.toLowerCase()) {
+        newGuess += targetChar;  // Use target's case
+      } else {
+        newGuess += key.toUpperCase();  // Always uppercase for non-matching letters
       }
-      // Add the new letter
-      newGuess += key.toLowerCase();
       
       setGameState(prev => ({
         ...prev,
@@ -171,28 +167,11 @@ export const useGame = () => {
     }));
   };
 
-  const handleGiveUp = () => {
-    if (gameState.guesses.length < 6) {
-      toast({
-        title: "Keep trying!",
-        description: "You need to make at least 6 guesses before giving up",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setGameState(prev => ({
-      ...prev,
-      gameStatus: 'gave_up'
-    }));
-  };
-
   return {
     gameState,
     letterStates,
     handleGuess,
     handleKeyPress,
     handleDelete,
-    handleGiveUp,
   };
 };

@@ -45,7 +45,7 @@ const Index = () => {
       <GameHeader />
       <HowToPlayDialog />
 
-      <main className="w-full max-w-lg mx-auto flex-1 flex flex-col">
+      <main className="w-full mx-auto flex-1 flex flex-col">
         <div className="flex-1 overflow-y-auto mb-4">
           <GameBoard
             guesses={gameState.guesses}
@@ -57,15 +57,6 @@ const Index = () => {
         </div>
         
         <div className="space-y-4">
-          {gameState.gameStatus === 'playing' && gameState.guesses.length >= 6 && (
-            <button
-              onClick={handleGiveUp}
-              className="w-full py-2 px-4 bg-absent/20 hover:bg-absent/30 dark:bg-absent-dark/20 dark:hover:bg-absent-dark/30 rounded-lg transition-colors"
-            >
-              Give Up
-            </button>
-          )}
-          
           <Keyboard
             onKeyPress={handleKeyPress}
             onDelete={handleDelete}

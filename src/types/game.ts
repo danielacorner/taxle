@@ -11,6 +11,6 @@ export interface GameState {
   currentGuess: string;
   guesses: string[];
   results: GuessResult[];
-  gameStatus: 'playing' | 'won' | 'lost' | 'gave_up';
+  gameStatus: 'playing' | 'won' | 'lost' ;
   targetSpecies: Species | null;
 }

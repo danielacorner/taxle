@@ -39,7 +39,7 @@ export const GameBoard = ({ guesses, results, currentGuess, targetLength, target
   };
 
   return (
-    <div className="grid gap-2 mx-auto w-full max-w-lg">
+    <div className="grid gap-2 mx-auto w-full" style={{maxWidth: "min(100%, 40rem)"}}>
       {guesses.map((guess, i) => (
         <div key={i} className="grid grid-cols-[repeat(auto-fit,minmax(2rem,1fr))] gap-1">
           {targetWord.split('').map((targetLetter, j) => {

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Species } from "@/types/game";
 
 interface GameResultProps {
-  gameStatus: 'playing' | 'won' | 'lost' | 'gave_up';
+  gameStatus: 'playing' | 'won' | 'lost' ;
   targetSpecies: Species;
 }
 
@@ -15,8 +15,6 @@ export const GameResult = ({ gameStatus, targetSpecies }: GameResultProps) => {
         return 'Congratulations! You got it!';
       case 'lost':
         return 'Better luck next time!';
-      case 'gave_up':
-        return "Don't worry, you can try again!";
       default:
         return '';
     }
