@@ -47,7 +47,7 @@ export const HowToPlayDialog = () => {
           <DialogTitle className="text-2xl font-bold mb-4 text-primary dark:text-white/90">How To Play</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 text-primary/90 dark:text-white/90">
-          <p>Guess the scientific name in 6 tries.</p>
+          <p>Guess the term in 6 tries.</p>
           
           <div className="space-y-4">
             <div className="space-y-2">
@@ -59,7 +59,7 @@ export const HowToPlayDialog = () => {
                   'present', 'present', 'present', 'absent', 'present', 'absent' // sapiens
                 ]}
               />
-              <p>The genus <strong>Homo</strong> is completely correct, while <strong>sapiens</strong> has some letters in the wrong positions.</p>
+              <p>The first word <strong>Homo</strong> is completely correct, while <strong>sapiens</strong> has some letters in the wrong positions.</p>
             </div>
 
             <div className="space-y-2">
@@ -71,11 +71,9 @@ export const HowToPlayDialog = () => {
                   'absent', 'absent', 'absent', 'absent', 'absent' // lupus
                 ]}
               />
-              <p>None of the letters in this guess appear in the target species name.</p>
+              <p>None of the letters in this guess appear in the target term.</p>
             </div>
           </div>
-
-          <p>A new taxonomic puzzle is released daily at midnight!</p>
         </div>
       </DialogContent>
     </Dialog>

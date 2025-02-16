@@ -96,6 +96,7 @@ export const useGame = () => {
         newLetterStates[letter] = newState;
       }
     });
+      console.log("🚀 ~ file: use-game.ts:92 ~ newLetterStates:", newLetterStates)
 
     setLetterStates(newLetterStates);
 

@@ -5,15 +5,22 @@ import { GameResult } from "@/components/GameResult";
 import { HowToPlayDialog } from "@/components/HowToPlayDialog";
 import { useGame } from "@/hooks/use-game";
 import { useEffect } from "react";
+import { GameState, GuessResult } from "@/types/game";
 
-const Index = () => {
-  const {
-    gameState,
-    letterStates,
-    submitGuess,
-    handleKeyPress,
-    handleDelete,
-  } = useGame();
+export const KeyboardAndHandlers = ({
+  gameState,
+  letterStates,
+  submitGuess,
+  handleKeyPress,
+  handleDelete,
+}: {
+  gameState: GameState;
+  letterStates: Record<string, GuessResult[0] | undefined>;
+  submitGuess: () => void;
+  handleKeyPress: (key: string) => void;
+  handleDelete: () => void;
+}) => {
+ 
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -37,40 +44,14 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState.gameStatus, handleKeyPress, handleDelete, submitGuess]);
 
-  if (!gameState.targetSpecies) return null;
-
   return (
-    <div className="min-h-screen bg-secondary/5 dark:bg-secondary-dark/5 flex flex-col items-center py-8 px-4 text-primary dark:text-white/90">
-      <GameHeader />
-      <HowToPlayDialog />
-
-      <main className="w-full mx-auto flex-1 flex flex-col">
-        <div className="flex-1 overflow-y-auto mb-4">
-          <GameBoard
-            guesses={gameState.guesses}
-            results={gameState.results}
-            currentGuess={gameState.currentGuess}
-            targetLength={gameState.targetSpecies.scientificName.length}
-            targetWord={gameState.targetSpecies.scientificName}
-          />
-        </div>
-        
-        <div className="space-y-4">
-          <Keyboard
-            onKeyPress={handleKeyPress}
-            onDelete={handleDelete}
-            onEnter={submitGuess}
-            letterStates={letterStates}
-          />
-        </div>
-
-        <GameResult 
-          gameStatus={gameState.gameStatus}
-          targetSpecies={gameState.targetSpecies}
-        />
-      </main>
+    <div className="flex flex-col items-center justify-center gap-8">
+      <Keyboard
+        onKeyPress={handleKeyPress}
+        onDelete={handleDelete}
+        onEnter={submitGuess}
+        letterStates={letterStates}
+      />
     </div>
   );
 };
-
-export default Index;

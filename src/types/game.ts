@@ -18,7 +18,6 @@ export interface GameState {
   gameStatus: GameStatus;
   selectedTopic?: TopicId;
   targetWord?: WordEntry;
-  targetSpecies: Species | null;
 }
 
 export interface GameStats {

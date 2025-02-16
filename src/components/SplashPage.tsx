@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect,  } from "react";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/hooks/use-game";
 import { GameBoard } from "./GameBoard";
 import { HowToPlayDialog } from "./HowToPlayDialog";
 import { topics } from "@/data/topics";
 import { Card } from "@/components/ui/card";
-import { TopicId } from "@/types/topics";
+import {KeyboardAndHandlers } from "@/pages/Game";
 
 export const SplashPage = () => {
   const {
@@ -62,6 +62,8 @@ export const SplashPage = () => {
         {topics.find(t => t.id === gameState.selectedTopic)?.title}
       </h2>
       
+      <HowToPlayDialog/>
+      
       <GameBoard
         guesses={gameState.guesses}
         results={gameState.results}
@@ -69,6 +71,13 @@ export const SplashPage = () => {
         targetLength={gameState.targetWord?.word.length || 0}
         targetWord={gameState.targetWord?.word || ""}
       />
+
+      <KeyboardAndHandlers
+      {...{ gameState,
+        letterStates,
+        submitGuess,
+        handleKeyPress,
+        handleDelete,}}/>
 
       {(gameState.gameStatus === 'won' || gameState.gameStatus === 'lost') && (
         <div className="flex flex-col items-center gap-4">
@@ -108,7 +117,6 @@ export const SplashPage = () => {
             Test your vocabulary across different fields of study
           </p>
         </header>
-
         {gameState.gameStatus === 'selecting' ? renderTopicSelection() : renderGame()}
       </div>
     </div>
