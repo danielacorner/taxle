@@ -1,27 +1,24 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { GameBoard } from "@/components/GameBoard";
-import { Keyboard } from "@/components/Keyboard";
-import { GameHeader } from "@/components/GameHeader";
-import { GameResult } from "@/components/GameResult";
-import { HowToPlayDialog } from "@/components/HowToPlayDialog";
 import { useGame } from "@/hooks/use-game";
-import { useEffect } from "react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { GameBoard } from "./GameBoard";
+import { HowToPlayDialog } from "./HowToPlayDialog";
+import { topics } from "@/data/topics";
+import { Card } from "@/components/ui/card";
+import { TopicId } from "@/types/topics";
 
 export const SplashPage = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
   const {
     gameState,
     letterStates,
+    selectTopic,
+    playAgain,
     submitGuess,
     handleKeyPress,
     handleDelete,
-    selectionMode,
-    setSelectionMode,
   } = useGame();
 
+  // Handle keyboard input when playing
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (gameState.gameStatus !== 'playing') return;
@@ -44,121 +41,75 @@ export const SplashPage = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState.gameStatus, handleKeyPress, handleDelete, submitGuess]);
 
-  if (!gameState.targetSpecies && isPlaying) return null;
+  const renderTopicSelection = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto p-4">
+      {topics.map((topic) => (
+        <Card 
+          key={topic.id}
+          className="p-4 cursor-pointer hover:bg-accent transition-colors"
+          onClick={() => selectTopic(topic.id)}
+        >
+          <h3 className="text-xl font-bold mb-2">{topic.title}</h3>
+          <p className="text-muted-foreground">{topic.description}</p>
+        </Card>
+      ))}
+    </div>
+  );
 
-  if (isPlaying) {
-    return (
-      <div className="min-h-screen bg-secondary/5 dark:bg-secondary-dark/5 flex flex-col items-center py-8 px-0 text-primary dark:text-white/90">
-        <GameHeader />
-        <HowToPlayDialog />
+  const renderGame = () => (
+    <div className="flex flex-col items-center justify-center gap-8">
+      <h2 className="text-2xl font-bold">
+        {topics.find(t => t.id === gameState.selectedTopic)?.title}
+      </h2>
+      
+      <GameBoard
+        guesses={gameState.guesses}
+        results={gameState.results}
+        currentGuess={gameState.currentGuess}
+        targetLength={gameState.targetWord?.word.length || 0}
+        targetWord={gameState.targetWord?.word || ""}
+      />
 
-        <main className="w-full mx-auto flex-1 flex flex-col">
-          <div className="flex-1 overflow-y-auto mb-4">
-            <GameBoard
-              guesses={gameState.guesses}
-              results={gameState.results}
-              currentGuess={gameState.currentGuess}
-              targetLength={gameState.targetSpecies?.scientificName.length || 0}
-              targetWord={gameState.targetSpecies?.scientificName || ''}
-            />
+      {(gameState.gameStatus === 'won' || gameState.gameStatus === 'lost') && (
+        <div className="flex flex-col items-center gap-4">
+          <div className="text-center">
+            {gameState.gameStatus === 'won' ? (
+              <h3 className="text-xl font-bold text-green-600">Congratulations!</h3>
+            ) : (
+              <div>
+                <h3 className="text-xl font-bold text-red-600">Game Over</h3>
+                <p className="mt-2">The word was: {gameState.targetWord?.word}</p>
+              </div>
+            )}
+            <p className="mt-2">{gameState.targetWord?.definition}</p>
+            {gameState.targetWord?.wikipediaUrl && (
+              <a 
+                href={gameState.targetWord.wikipediaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline mt-2 block"
+              >
+                Learn more
+              </a>
+            )}
           </div>
-
-          {gameState.gameStatus !== 'playing' && (
-            <GameResult
-              gameStatus={gameState.gameStatus}
-              targetSpecies={gameState.targetSpecies!}
-            />
-          )}
-
-          {gameState.gameStatus === 'playing' && (
-            <Keyboard
-              letterStates={letterStates}
-              onKeyPress={handleKeyPress}
-              onDelete={handleDelete}
-              onEnter={submitGuess}
-            />
-          )}
-        </main>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
-      {/* Logo - Taxonomic Tree */}
-      <div className="mb-8 relative">
-        <div className="grid grid-cols-3 gap-1">
-          {/* Kingdom */}
-          <div className="w-8 h-8 border-2 bg-[#538D4E] border-[#538D4E]" />
-          {/* Connecting line */}
-          <div className="w-8 h-8 flex items-center justify-center">
-            <div className="w-full h-0.5 bg-[#538D4E]" />
-          </div>
-          {/* Phylum */}
-          <div className="w-8 h-8 border-2 bg-[#538D4E] border-[#538D4E]" />
-          
-          {/* Vertical connectors */}
-          <div className="w-8 h-8 flex justify-center">
-            <div className="w-0.5 h-full bg-[#B59F3B]" />
-          </div>
-          <div className="w-8 h-8" />
-          <div className="w-8 h-8 flex justify-center">
-            <div className="w-0.5 h-full bg-[#B59F3B]" />
-          </div>
-          
-          {/* Class */}
-          <div className="w-8 h-8 border-2 bg-[#B59F3B] border-[#B59F3B]" />
-          {/* Connecting line */}
-          <div className="w-8 h-8 flex items-center justify-center">
-            <div className="w-full h-0.5 bg-[#B59F3B]" />
-          </div>
-          {/* Order */}
-          <div className="w-8 h-8 border-2 bg-[#B59F3B] border-[#B59F3B]" />
-        </div>
-        
-        {/* Labels */}
-        <div className="absolute -left-16 top-1 text-xs text-muted-foreground">Kingdom</div>
-        <div className="absolute -right-14 top-1 text-xs text-muted-foreground">Phylum</div>
-        <div className="absolute -left-12 bottom-1 text-xs text-muted-foreground">Class</div>
-        <div className="absolute -right-12 bottom-1 text-xs text-muted-foreground">Order</div>
-      </div>
-
-      {/* Title */}
-      <h1 className="text-4xl font-bold mb-8">Taxle</h1>
-
-      {/* Description */}
-      <p className="text-xl text-center mb-12">
-        Get 6 chances to guess a <em>genus species</em> name.
-      </p>
-
-      {import.meta.env.DEV && (
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="mode-toggle"
-            checked={selectionMode === 'daily'}
-            onCheckedChange={(checked) => setSelectionMode(checked ? 'daily' : 'random')}
-          />
-          <Label htmlFor="mode-toggle">Daily Word Mode</Label>
+          <Button onClick={playAgain}>Play Again</Button>
         </div>
       )}
+    </div>
+  );
 
-      {/* Play Button */}
-      <Button
-        onClick={() => setIsPlaying(true)}
-        className="px-12 py-6 text-lg"
-      >
-        Play
-      </Button>
+  return (
+    <div className="min-h-screen p-4">
+      <div className="max-w-7xl mx-auto">
+        <header className="text-center mb-8">
+          <h1 className="text-4xl font-bold mb-2">Wordle of Knowledge</h1>
+          <p className="text-xl text-muted-foreground">
+            Test your vocabulary across different fields of study
+          </p>
+        </header>
 
-      {/* Date */}
-      <div className="mt-12 text-center">
-        <p className="text-sm text-muted-foreground">
-          {new Date().toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric"
-          })}
-        </p>
+        {gameState.gameStatus === 'selecting' ? renderTopicSelection() : renderGame()}
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { GuessResult, GameState } from "@/types/game";
-import { speciesDatabase } from "@/data/species";
+import { GameState, GuessResult } from "@/types/game";
 import { useToast } from "@/hooks/use-toast";
 import { gameEvents } from "@/utils/analytics";
-import { useAtom } from 'jotai';
-import { speciesSelectionModeAtom, getTodaysSpeciesIndex } from '../utils/game-settings';
+import { TopicId } from "@/types/topics";
+import { topics } from "@/data/topics";
+import { getRandomWord } from "@/utils/word-utils";
 
 export const useGame = () => {
   const { toast } = useToast();
@@ -12,169 +12,155 @@ export const useGame = () => {
     currentGuess: "",
     guesses: [],
     results: [],
-    gameStatus: "playing",
-    targetSpecies: null,
+    gameStatus: "selecting",
   });
 
   const [letterStates, setLetterStates] = useState<Record<string, 'correct' | 'present' | 'absent'>>({});
-  const [selectionMode, setSelectionMode] = useAtom(speciesSelectionModeAtom);
 
-  useEffect(() => {
-    // Get species based on mode
-    const speciesIndex = getTodaysSpeciesIndex(speciesDatabase.length, selectionMode);
-    const todaysSpecies = speciesDatabase[speciesIndex];
-    setGameState(prev => ({ ...prev, targetSpecies: todaysSpecies }));
-    
-    // Track game start
+  const selectTopic = (topicId: TopicId) => {
+    const word = getRandomWord(topicId);
+    setGameState(prev => ({
+      ...prev,
+      gameStatus: "playing",
+      selectedTopic: topicId,
+      targetWord: word,
+    }));
     gameEvents.startGame();
-  }, [selectionMode]);
+  };
+
+  const playAgain = () => {
+    if (!gameState.selectedTopic) return;
+    
+    const word = getRandomWord(gameState.selectedTopic);
+    setGameState({
+      currentGuess: "",
+      guesses: [],
+      results: [],
+      gameStatus: "playing",
+      selectedTopic: gameState.selectedTopic,
+      targetWord: word,
+    });
+    setLetterStates({});
+    gameEvents.startGame();
+  };
 
   const checkGuess = (guess: string): GuessResult => {
-    if (!gameState.targetSpecies) return [];
+    if (!gameState.targetWord) return [];
     
-    const target = gameState.targetSpecies.scientificName;
-    const result: GuessResult = Array(target.length).fill('absent');
-    const targetChars = [...target];
-    const guessChars = [...guess];
-    
-    // First pass: mark correct letters (exact case match)
+    const target = gameState.targetWord.word;
+    const result: GuessResult = new Array(target.length).fill("absent");
+    const targetChars = target.split("");
+    const guessChars = guess.split("");
+
+    // First pass: mark correct letters
     guessChars.forEach((char, i) => {
       if (char === targetChars[i]) {
-        result[i] = 'correct';
-        targetChars[i] = '#';  // Mark as used
+        result[i] = "correct";
+        targetChars[i] = "#"; // mark as used
       }
     });
-    
-    // Second pass: mark present letters (case-insensitive)
+
+    // Second pass: mark present letters
     guessChars.forEach((char, i) => {
-      if (result[i] !== 'correct' && char !== ' ') {
-        const targetIndex = targetChars.findIndex(c => 
-          c !== '#' && c.toLowerCase() === char.toLowerCase()
-        );
-        if (targetIndex !== -1) {
-          result[i] = 'present';
-          targetChars[targetIndex] = '#';  // Mark as used
-        }
+      if (result[i] === "correct") return;
+      
+      const targetIndex = targetChars.findIndex(c => c === char);
+      if (targetIndex !== -1) {
+        result[i] = "present";
+        targetChars[targetIndex] = "#"; // mark as used
       }
     });
-    
+
     return result;
   };
 
-  const updateLetterStates = (guess: string, result: GuessResult) => {
-    const newStates = { ...letterStates };
-    guess.toUpperCase().split('').forEach((letter, i) => {
-      if (letter === ' ') return;
-      
-      const currentState = newStates[letter];
-      const newState = result[i];
-      
-      if (newState === 'correct') {
-        newStates[letter] = 'correct';
-      } else if (newState === 'present' && currentState !== 'correct') {
-        newStates[letter] = 'present';
-      } else if (!currentState && newState === 'absent') {
-        newStates[letter] = 'absent';
-      }
-    });
-    setLetterStates(newStates);
-  };
-
   const submitGuess = () => {
-    if (!gameState.targetSpecies) return;
-
-    const guess = gameState.currentGuess.trim();
-    if (guess.length === 0) {
+    if (!gameState.targetWord || gameState.currentGuess.length !== gameState.targetWord.word.length) {
       toast({
-        description: "Please enter a guess",
+        title: "Invalid guess",
+        description: `Guess must be ${gameState.targetWord?.word.length} letters long.`,
       });
       return;
     }
 
-    const result = checkGuess(guess);
-    const newGuesses = [...gameState.guesses, guess];
+    const result = checkGuess(gameState.currentGuess);
+    const newGuesses = [...gameState.guesses, gameState.currentGuess];
     const newResults = [...gameState.results, result];
 
-    // Track the guess attempt
-    gameEvents.makeGuess(newGuesses.length);
+    // Update letter states
+    const newLetterStates = { ...letterStates };
+    gameState.currentGuess.split("").forEach((letter, i) => {
+      const currentState = newLetterStates[letter];
+      const newState = result[i];
+      if (!currentState || (currentState === "absent" && newState !== "absent")) {
+        newLetterStates[letter] = newState;
+      }
+    });
 
-    let newGameStatus = gameState.gameStatus;
-    if (guess === gameState.targetSpecies.scientificName) {
-      newGameStatus = "won";
-      // Track game won
-      gameEvents.gameWon(newGuesses.length);
-    } else if (newGuesses.length >= 6) {
-      newGameStatus = "lost";
-      // Track game lost
-      gameEvents.gameLost(gameState.targetSpecies.scientificName);
+    setLetterStates(newLetterStates);
+
+    // Check if won
+    const hasWon = result.every(r => r === "correct");
+    if (hasWon) {
+      setGameState(prev => ({
+        ...prev,
+        currentGuess: "",
+        guesses: newGuesses,
+        results: newResults,
+        gameStatus: "won",
+      }));
+      gameEvents.gameWon(gameState.targetWord.word);
+      return;
     }
 
-    updateLetterStates(guess, result);
+    // Check if lost
+    if (newGuesses.length >= 6) {
+      setGameState(prev => ({
+        ...prev,
+        currentGuess: "",
+        guesses: newGuesses,
+        results: newResults,
+        gameStatus: "lost",
+      }));
+      gameEvents.gameLost(gameState.targetWord.word);
+      return;
+    }
 
-    setGameState({
-      ...gameState,
+    // Continue game
+    setGameState(prev => ({
+      ...prev,
       currentGuess: "",
       guesses: newGuesses,
       results: newResults,
-      gameStatus: newGameStatus,
-    });
+    }));
   };
 
   const handleKeyPress = (key: string) => {
-    if (gameState.gameStatus !== 'playing' || !gameState.targetSpecies) return;
-    
-    const targetWord = gameState.targetSpecies.scientificName;
-    let newGuess = gameState.currentGuess;
-    
-    // Find the next non-space position in the target word
-    let nextPos = newGuess.length;
-    while (nextPos < targetWord.length && targetWord[nextPos] === ' ') {
-      newGuess += ' ';  // Add spaces directly
-      nextPos++;
-    }
-    
-    // If we haven't reached the end and the next position is valid
-    if (nextPos < targetWord.length) {
-      // Add the new letter, preserving case based on target word
-      const targetChar = targetWord[nextPos];
-      if (targetChar.toLowerCase() === key.toLowerCase()) {
-        newGuess += targetChar;  // Use target's case
-      } else {
-        newGuess += key.toUpperCase();  // Always uppercase for non-matching letters
-      }
-      
-      setGameState(prev => ({
-        ...prev,
-        currentGuess: newGuess,
-      }));
-    }
-  };
-
-  const handleDelete = () => {
-    if (!gameState.currentGuess.length) return;
-    
-    let newGuess = gameState.currentGuess;
-    // Remove trailing spaces and last character
-    while (newGuess.length > 0 && newGuess[newGuess.length - 1] === ' ') {
-      newGuess = newGuess.slice(0, -1);
-    }
-    if (newGuess.length > 0) {
-      newGuess = newGuess.slice(0, -1);
-    }
+    if (!gameState.targetWord) return;
     
     setGameState(prev => ({
       ...prev,
-      currentGuess: newGuess,
+      currentGuess:
+        prev.currentGuess.length < prev.targetWord!.word.length
+          ? prev.currentGuess + key
+          : prev.currentGuess,
+    }));
+  };
+
+  const handleDelete = () => {
+    setGameState(prev => ({
+      ...prev,
+      currentGuess: prev.currentGuess.slice(0, -1),
     }));
   };
 
   return {
     gameState,
     letterStates,
+    selectTopic,
+    playAgain,
     submitGuess,
     handleKeyPress,
     handleDelete,
-    selectionMode,
-    setSelectionMode,
   };
 };
