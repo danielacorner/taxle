@@ -4,6 +4,8 @@ import { speciesDatabase } from "@/data/species";
 import { useToast } from "@/hooks/use-toast";
 import { getDailySeed, getSeededRandom } from "@/utils/daily-seed";
 import { gameEvents } from "@/utils/analytics";
+import { useAtom } from 'jotai';
+import { speciesSelectionModeAtom, getTodaysSpeciesIndex } from '../utils/game-settings';
 
 export const useGame = () => {
   const { toast } = useToast();
@@ -16,17 +18,17 @@ export const useGame = () => {
   });
 
   const [letterStates, setLetterStates] = useState<Record<string, 'correct' | 'present' | 'absent'>>({});
+  const [selectionMode, setSelectionMode] = useAtom(speciesSelectionModeAtom);
 
   useEffect(() => {
-    // Get today's seed and use it to select today's species
-    const seed = getDailySeed();
-    const speciesIndex = getSeededRandom(seed, speciesDatabase.length);
+    // Get species based on mode
+    const speciesIndex = getTodaysSpeciesIndex(speciesDatabase.length, selectionMode);
     const todaysSpecies = speciesDatabase[speciesIndex];
     setGameState(prev => ({ ...prev, targetSpecies: todaysSpecies }));
     
     // Track game start
     gameEvents.startGame();
-  }, []);
+  }, [selectionMode]);
 
   const checkGuess = (guess: string): GuessResult => {
     if (!gameState.targetSpecies) return [];
@@ -173,5 +175,7 @@ export const useGame = () => {
     submitGuess,
     handleKeyPress,
     handleDelete,
+    selectionMode,
+    setSelectionMode,
   };
 };

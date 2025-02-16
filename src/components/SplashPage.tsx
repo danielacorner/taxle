@@ -7,6 +7,8 @@ import { GameResult } from "@/components/GameResult";
 import { HowToPlayDialog } from "@/components/HowToPlayDialog";
 import { useGame } from "@/hooks/use-game";
 import { useEffect } from "react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export const SplashPage = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -16,6 +18,8 @@ export const SplashPage = () => {
     submitGuess,
     handleKeyPress,
     handleDelete,
+    selectionMode,
+    setSelectionMode,
   } = useGame();
 
   useEffect(() => {
@@ -126,6 +130,17 @@ export const SplashPage = () => {
       <p className="text-xl text-center mb-12">
         Get 6 chances to guess a <em>genus species</em> name.
       </p>
+
+      {import.meta.env.DEV && (
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="mode-toggle"
+            checked={selectionMode === 'daily'}
+            onCheckedChange={(checked) => setSelectionMode(checked ? 'daily' : 'random')}
+          />
+          <Label htmlFor="mode-toggle">Daily Word Mode</Label>
+        </div>
+      )}
 
       {/* Play Button */}
       <Button
