@@ -44,7 +44,7 @@ export const SplashPage = () => {
 
   if (isPlaying) {
     return (
-      <div className="min-h-screen bg-secondary/5 dark:bg-secondary-dark/5 flex flex-col items-center py-8 px-4 text-primary dark:text-white/90">
+      <div className="min-h-screen bg-secondary/5 dark:bg-secondary-dark/5 flex flex-col items-center py-8 px-0 text-primary dark:text-white/90">
         <GameHeader />
         <HowToPlayDialog />
 

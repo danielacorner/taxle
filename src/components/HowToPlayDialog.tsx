@@ -23,7 +23,7 @@ const ExampleGuess = ({ name, statuses }: { name: string; statuses: Array<'corre
               return (
                 <div
                   key={index}
-                  className={`w-8 h-8 ${bgColor} flex items-center justify-center text-white font-bold rounded`}
+                  className={`w-6 h-8 sm:w-8 sm:h-8 ${bgColor} flex items-center justify-center text-sm sm:text-base text-white font-bold rounded`}
                 >
                   {letter.toUpperCase()}
                 </div>

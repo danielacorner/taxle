@@ -24,13 +24,13 @@ export const GameBoard = ({ guesses, results, currentGuess, targetLength, target
   const renderCell = (letter: string, result?: 'correct' | 'present' | 'absent') => {
     if (letter === ' ') {
       return (
-        <div className="h-14 flex items-center justify-center text-xl font-bold border-2 border-primary/5 dark:border-primary-dark/5 rounded bg-secondary/5 dark:bg-secondary-dark/5">
+        <div className="h-8 w-3 sm:w-5 sm:h-14 flex items-center justify-center text-sm sm:text-xl font-bold border-2 border-primary/5 dark:border-primary-dark/5 rounded bg-secondary/5 dark:bg-secondary-dark/5">
         </div>
       );
     }
 
     return (
-      <div className={`h-14 flex items-center justify-center text-xl font-bold border-2 rounded text-primary dark:text-white ${
+      <div className={`h-8 w-6 sm:w-10 sm:h-14 flex items-center justify-center text-sm sm:text-xl font-bold border-2 rounded text-primary dark:text-white ${
         result ? getBackgroundColor(result) : 'border-primary/30 dark:border-white/35 bg-secondary/5 dark:bg-secondary-light/5'
       }`}>
         {letter.toUpperCase()}
@@ -39,9 +39,9 @@ export const GameBoard = ({ guesses, results, currentGuess, targetLength, target
   };
 
   return (
-    <div className="grid gap-2 mx-auto w-full" style={{maxWidth: "min(100%, 40rem)"}}>
+    <div className="flex flex-col gap-3 mx-auto w-full" style={{maxWidth: "min(100%, 40rem)"}}>
       {guesses.map((guess, i) => (
-        <div key={i} className="grid grid-cols-[repeat(auto-fit,minmax(2rem,1fr))] gap-1">
+        <div key={i} className="flex gap-1 justify-center">
           {targetWord.split('').map((targetLetter, j) => {
             // Always render spaces from target word
             if (targetLetter === ' ') {
@@ -52,40 +52,32 @@ export const GameBoard = ({ guesses, results, currentGuess, targetLength, target
               );
             }
 
-            // For non-space positions, get the corresponding guess letter
-            // by counting only non-space characters up to this position
-            const nonSpaceIndexInTarget = targetWord.slice(0, j).replace(/\s/g, '').length;
-            const guessLetter = guess.replace(/\s/g, '')[nonSpaceIndexInTarget];
-            
             return (
-              <motion.div
-                key={`${i}-${j}`}
-                initial={{ rotateX: 0 }}
-                animate={{ rotateX: [0, 90, 0] }}
-                transition={{ duration: 0.6, delay: j * 0.1 }}
-              >
-                {renderCell(guessLetter || '', results[i][j])}
-              </motion.div>
+              <div key={`${i}-${j}`}>
+                {renderCell(guess[j] || '', results[i]?.[j])}
+              </div>
             );
           })}
         </div>
       ))}
       
       {currentGuess && (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(2rem,1fr))] gap-1">
+        <div className="flex gap-1 justify-center">
           {targetWord.split('').map((targetLetter, i) => {
             if (targetLetter === ' ') {
               return (
-                <div key={`current-${i}`}>
+                <div key={i}>
                   {renderCell(' ')}
                 </div>
               );
             }
+
             return (
               <motion.div
-                key={`current-${i}`}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+                key={i}
+                initial={{ scale: currentGuess[i] ? 0 : 1 }}
+                animate={{ scale: 1 }}
+                className="origin-center"
               >
                 {renderCell(currentGuess[i] || '')}
               </motion.div>
@@ -95,7 +87,7 @@ export const GameBoard = ({ guesses, results, currentGuess, targetLength, target
       )}
       
       {Array(emptyRows).fill(null).map((_, i) => (
-        <div key={`empty-row-${i}`} className="dark:text-white grid grid-cols-[repeat(auto-fit,minmax(2rem,1fr))] gap-1">
+        <div key={`empty-row-${i}`} className="dark:text-white flex gap-1 justify-center">
           {targetWord.split('').map((targetLetter, j) => (
             <div key={`empty-${i}-${j}`}>
               {renderCell(targetLetter === ' ' ? ' ' : '')}
