@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Species, GuessResult, GameState } from "@/types/game";
+import { GuessResult, GameState } from "@/types/game";
 import { speciesDatabase } from "@/data/species";
 import { useToast } from "@/hooks/use-toast";
-import { getDailySeed, getSeededRandom } from "@/utils/daily-seed";
 import { gameEvents } from "@/utils/analytics";
 import { useAtom } from 'jotai';
 import { speciesSelectionModeAtom, getTodaysSpeciesIndex } from '../utils/game-settings';

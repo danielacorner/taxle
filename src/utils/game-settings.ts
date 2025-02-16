@@ -4,7 +4,8 @@ import { atom } from 'jotai';
 const isDev = import.meta.env.DEV;
 
 // Create an atom to store the selection mode
-export const speciesSelectionModeAtom = atom<'random' | 'daily'>(isDev ? 'random' : 'daily');
+export const speciesSelectionModeAtom = atom<'random' | 'daily'>('daily');
+// export const speciesSelectionModeAtom = atom<'random' | 'daily'>(isDev ? 'random' : 'daily');
 
 // Function to get today's species index
 export const getTodaysSpeciesIndex = (speciesCount: number, mode: 'random' | 'daily' = 'daily') => {

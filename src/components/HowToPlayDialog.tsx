@@ -53,10 +53,10 @@ export const HowToPlayDialog = () => {
             <div className="space-y-2">
               <p className="font-bold">Example 1:</p>
               <ExampleGuess
-                name="Homo sapiens"
+                name="Homo sapinse"
                 statuses={[
                   'correct', 'correct', 'correct', 'correct', // Homo
-                  'present', 'absent', 'present', 'absent', 'present', 'absent' // sapiens
+                  'present', 'present', 'present', 'absent', 'present', 'absent' // sapiens
                 ]}
               />
               <p>The genus <strong>Homo</strong> is completely correct, while <strong>sapiens</strong> has some letters in the wrong positions.</p>
