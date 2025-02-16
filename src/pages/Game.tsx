@@ -13,7 +13,6 @@ const Index = () => {
     submitGuess,
     handleKeyPress,
     handleDelete,
-    handleGiveUp,
   } = useGame();
 
   useEffect(() => {

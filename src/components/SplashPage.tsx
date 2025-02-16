@@ -1,8 +1,83 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { GameBoard } from "@/components/GameBoard";
+import { Keyboard } from "@/components/Keyboard";
+import { GameHeader } from "@/components/GameHeader";
+import { GameResult } from "@/components/GameResult";
+import { HowToPlayDialog } from "@/components/HowToPlayDialog";
+import { useGame } from "@/hooks/use-game";
+import { useEffect } from "react";
 
 export const SplashPage = () => {
-  const navigate = useNavigate();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const {
+    gameState,
+    letterStates,
+    submitGuess,
+    handleKeyPress,
+    handleDelete,
+  } = useGame();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (gameState.gameStatus !== 'playing') return;
+
+      // Handle letter keys
+      if (/^[a-zA-Z]$/.test(e.key)) {
+        handleKeyPress(e.key.toUpperCase());
+      }
+      // Handle backspace/delete
+      else if (e.key === 'Backspace' || e.key === 'Delete') {
+        handleDelete();
+      }
+      // Handle enter
+      else if (e.key === 'Enter') {
+        submitGuess();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState.gameStatus, handleKeyPress, handleDelete, submitGuess]);
+
+  if (!gameState.targetSpecies && isPlaying) return null;
+
+  if (isPlaying) {
+    return (
+      <div className="min-h-screen bg-secondary/5 dark:bg-secondary-dark/5 flex flex-col items-center py-8 px-4 text-primary dark:text-white/90">
+        <GameHeader />
+        <HowToPlayDialog />
+
+        <main className="w-full mx-auto flex-1 flex flex-col">
+          <div className="flex-1 overflow-y-auto mb-4">
+            <GameBoard
+              guesses={gameState.guesses}
+              results={gameState.results}
+              currentGuess={gameState.currentGuess}
+              targetLength={gameState.targetSpecies?.scientificName.length || 0}
+              targetWord={gameState.targetSpecies?.scientificName || ''}
+            />
+          </div>
+
+          {gameState.gameStatus !== 'playing' && (
+            <GameResult
+              gameStatus={gameState.gameStatus}
+              targetSpecies={gameState.targetSpecies!}
+            />
+          )}
+
+          {gameState.gameStatus === 'playing' && (
+            <Keyboard
+              letterStates={letterStates}
+              onKeyPress={handleKeyPress}
+              onDelete={handleDelete}
+              onEnter={submitGuess}
+            />
+          )}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
@@ -54,7 +129,7 @@ export const SplashPage = () => {
 
       {/* Play Button */}
       <Button
-        onClick={() => navigate("/game")}
+        onClick={() => setIsPlaying(true)}
         className="px-12 py-6 text-lg"
       >
         Play

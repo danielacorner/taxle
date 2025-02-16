@@ -29,6 +29,7 @@ const ExampleGuess = ({ name, statuses }: { name: string; statuses: Array<'corre
                 </div>
               );
             })}
+            {partIndex !== name.split(' ').length - 1 && <div className="text-primary mx-2 dark:text-white/90">{" "}</div>}
           </div>
         ))}
       </div>
